@@ -1,0 +1,9 @@
+
+.DS_Store
+.idea/libraries/R_User_Library.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/Project.iml
+.idea/vcs.xml
+.idea/workspace.xml
+*.pyc
