@@ -4,7 +4,7 @@ from setting import *
 import pygame
 from Box import *
 from Tree import *
-from Water import *
+from Sea import *
 from Factory import *
 from House import *
 
@@ -21,14 +21,21 @@ class Game:
         self.resource = 2700
         self.carryingCapacity = 4100
 
-        self.allWater = {}
+        self.currentTurn = 0
+        # counter of Sprites
+        self.treeCount = 200
+        self.houseCount = 5
+        self.factoryCount = 1
+
+        self.allSea = pygame.sprite.Group()
         self.allFactories = pygame.sprite.Group()
         self.allTrees = pygame.sprite.Group()
         self.allHouses = pygame.sprite.Group()
 
         self.spriteDict = {}
+        self.constructionList = []
         self.running = True
-        self.box = Box(self.screen)
+        self.box = Box(self, self.screen)
         pygame.key.set_repeat(300, 100)
 
 
@@ -75,7 +82,11 @@ class Game:
                 if keys[K_h]:
                     house = House(self, self.box.x, self.box.y)
                     self.addSprite(self.spriteDict, self.allSprites, self.allHouses, house)
-                    print((len(self.allSprites), len(self.allHouses)))
+
+                # testing sea over here:
+                if keys[K_s]:
+                    sea = Sea(self, self.box.x, self.box.y)
+                    self.addSprite(self.spriteDict, self.allSprites, self.allSea, sea)
 
                 if keys[K_RETURN]:
                     self.newTurn()
@@ -85,19 +96,23 @@ class Game:
         # add one turn for each constructing sprite,
         # they will change color when the construction is finished
         for sprite in self.spriteDict:
-
             pass
-        numHouses = len(self.allHouses)
-        numFactories = len(self.allFactories)
-        numTrees = len(self.allTrees)
+        try:
+            checkSpritesCompletion = lambda sprite: not sprite.nextTurn()
+            self.constructionList = list(filter(checkSpritesCompletion, self.constructionList))
+        except():
+            pass
+        print(len(self.constructionList))
 
-        # update resources (remove +1)
-        self.resource = (numFactories + 1) * 300 + STARTRESOURCES - self.population / 20
-        print(self.resource)
+        numHouses = self.houseCount
+        numFactories = self.factoryCount
+        numTrees = self.treeCount
+
+        self.currentTurn += 1
+        self.resource = numFactories * 300 + STARTRESOURCES - self.population / 20
         # update capacity
         if self.resource > numHouses * 800:
-            #remove + 5
-            self.carryingCapacity = (numHouses + 5) * 800
+            self.carryingCapacity = numHouses * 800
         else:
             self.carryingCapacity = self.resource
 
@@ -107,9 +122,10 @@ class Game:
 
         # update seaLevel
         self.seaLevel += 1 + numTrees * 0.05
-
+        self.currentTurn += 1
         print("seaLevel " + str(self.seaLevel) + "\n" + "population " + str(self.population) + "\n" + "capacity " + str(self.carryingCapacity)
               + "\n" + "resources " + str(self.resource) + "\n\n")
+
 
     def update(self):
         self.allSprites.update()
@@ -134,7 +150,7 @@ class Game:
         for y in range(0, SCREENHEIGHT, TILESIZE):
             pygame.draw.line(self.screen, LIGHTGREY, (0, y), (SCREENWIDTH, y))
 
-    def addSprite(self, myDict, myGroup, specificGroup,sprite):
+    def addSprite(self, myDict, myGroup, specificGroup, sprite):
         x = self.box.x
         y = self.box.y
         checkIfOccupied = myDict.get((x, y))
@@ -143,6 +159,8 @@ class Game:
             myGroup.add(sprite)
             specificGroup.add(sprite)
             myDict[(x, y)] = sprite
+            self.constructionList.append(sprite)
+            # print("addSprite()" + str(len(self.constructionList)))
 
     def delSprite(self, myDict):
         x = self.box.x
@@ -154,29 +172,28 @@ class Game:
                 ## you might delete the left part
                 other = checkIfOccupied.otherSquare
                 del myDict[other]
-            except:
+            except():
                 pass
             checkIfOccupied.kill()
 
 
     # edited
-    # def initializeTerrain(self, initDict):
-    #     # initDict contains the initial terrain, and has the same structure of "myDict",
-    #     # but the values are int instead of booleans
-    #     # e.g: 1=water, 2=building, 3=tree, 4=land...
-    #     # We will be needing a dictionary for every kind of terrain, or we may need to change the value type of myDict
-    #     # into integers (and modify the )
-    #     for x in range(0, SCREENWIDTH, TILESIZE):
-    #         for y in range(0, SCREENHEIGHT, TILESIZE):
-    #             type = initDict.get(x, y)
-    #             if type == 1:
-    #                 tree = Tree(self, x, y)
-    #                 self.addSprite(self.treeDict, self.allTrees, tree)
-    #                 self.allSprites.add(tree)
-    #                 self.allTrees.add(tree)
-    #                 self.Treedict[(x, y)] = tree
-    #
-    #              pass
+    def initializeTerrain(self, initDict):
+        # initDict contains the initial terrain, and has the same structure of "myDict",
+        # but the values are int instead of booleans
+        # e.g: 1=water, 2=building, 3=tree, 4=land...
+        # We will be needing a dictionary for every kind of terrain, or we may need to change the value type of myDict
+        # into integers (and modify the )
+        for x in range(0, SCREENWIDTH, TILESIZE):
+            for y in range(0, SCREENHEIGHT, TILESIZE):
+                type = initDict.get(x, y)
+                if type == 1:
+                    tree = Tree(self, x, y)
+                    self.addSprite(self.treeDict, self.allTrees, tree)
+                    self.allSprites.add(tree)
+                    self.allTrees.add(tree)
+                    # self.Treedict[(x, y)] = tree
+                    pass
     # edited
 
 game = Game()
