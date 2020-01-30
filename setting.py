@@ -33,6 +33,7 @@ from pygame.locals import (
     K_x,
     K_f,
     K_h,
+    K_s,
 )
 
 WATERLEVELCHANGE = 1

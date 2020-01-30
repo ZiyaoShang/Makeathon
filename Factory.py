@@ -3,7 +3,8 @@ from setting import *
 
 class Factory(pygame.sprite.Sprite):
     TURN = 3
-    def __init__(self, game, x1, y1, x2, y2):
+    color = PURPLE
+    def __init__(self, game, x1, y1, x2, y2, modifier = 0):
         super().__init__()
         self.game = game
         self.x = 0
@@ -12,6 +13,8 @@ class Factory(pygame.sprite.Sprite):
         self.image = None
         self.rect = None
         self.otherSquare = (x2, y2)
+        self.modifier = modifier
+        self.turn = 0
 
         if y1 != y2 and x1 != x2:
             return None
@@ -41,6 +44,16 @@ class Factory(pygame.sprite.Sprite):
                 self.y = y2
                 self.rect = self.image.get_rect(center=((x1 + 0.5) * TILESIZE, y1 * TILESIZE))
 
-        self.image.fill(self.color)
+        self.image.fill(WHITE)
 
 
+    def nextTurn(self):
+        self.turn += 1
+        if self.turn == Factory.TURN + self.modifier:
+            self.completeBuilding()
+            return True
+        return False
+
+    def completeBuilding(self):
+        self.image.fill(Factory.color)
+        self.game.factoryCount += 1
