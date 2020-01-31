@@ -1,5 +1,6 @@
 import pygame
 from setting import *
+from SPRITETYPE import *
 
 class Factory(pygame.sprite.Sprite):
     TURN = 3
@@ -15,6 +16,7 @@ class Factory(pygame.sprite.Sprite):
         self.otherSquare = (x2, y2)
         self.modifier = modifier
         self.turn = 0
+        self.type = SPRITETYPE.FACTORY
 
         if y1 != y2 and x1 != x2:
             return None
@@ -45,6 +47,10 @@ class Factory(pygame.sprite.Sprite):
                 self.rect = self.image.get_rect(center=((x1 + 0.5) * TILESIZE, y1 * TILESIZE))
 
         self.image.fill(WHITE)
+
+
+        if self.turn == Factory.TURN + self.modifier:
+            self.completeBuilding()
 
 
     def nextTurn(self):
