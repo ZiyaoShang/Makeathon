@@ -17,10 +17,12 @@ class Tree(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=((x + 0.5) * TILESIZE, (y + 0.5) * TILESIZE))
         self.turn = 0
         self.modifier = modifier
+
+        if self.turn == Tree.TURN + self.modifier:
+            self.completeBuilding()
         # self.endTurn = game.currentTurn + Tree.TURN
 
     def nextTurn(self):
-        print("nextTurn")
         self.turn += 1
         if self.turn == Tree.TURN + self.modifier:
             self.completeBuilding()

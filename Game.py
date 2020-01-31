@@ -7,7 +7,7 @@ from Tree import *
 from Sea import *
 from Factory import *
 from House import *
-
+from SPRITETYPE import *
 
 class Game:
 
@@ -35,9 +35,12 @@ class Game:
         self.spriteDict = {}
         self.constructionList = []
         self.running = True
-        self.box = Box(self, self.screen)
         pygame.key.set_repeat(300, 100)
+        # self.initializeTerrain()
+        self.box = Box(self, self.screen)
 
+        self.seaX = 0
+        self.seaY = 10
 
     # Game loop
     def run(self):
@@ -125,7 +128,10 @@ class Game:
         self.currentTurn += 1
         print("seaLevel " + str(self.seaLevel) + "\n" + "population " + str(self.population) + "\n" + "capacity " + str(self.carryingCapacity)
               + "\n" + "resources " + str(self.resource) + "\n\n")
+        # self.initializeTerrain()
 
+        for x in range(0, int(1 + numTrees * 0.05)):
+            self.seaRise()
 
     def update(self):
         self.allSprites.update()
@@ -135,9 +141,9 @@ class Game:
 
     def draw(self):
         self.screen.fill(DARKGREY)
+        self.allSprites.draw(self.screen)
         self.draw_grid()
         self.box.move()
-        self.allSprites.draw(self.screen)
         pygame.display.flip()
 
 
@@ -151,14 +157,16 @@ class Game:
             pygame.draw.line(self.screen, LIGHTGREY, (0, y), (SCREENWIDTH, y))
 
     def addSprite(self, myDict, myGroup, specificGroup, sprite):
-        x = self.box.x
-        y = self.box.y
+        x = sprite.x
+        y = sprite.y
         checkIfOccupied = myDict.get((x, y))
         if not checkIfOccupied:
             self.allSprites.add(sprite)
             myGroup.add(sprite)
             specificGroup.add(sprite)
             myDict[(x, y)] = sprite
+            if sprite.type == SPRITETYPE.SEA:
+                return
             self.constructionList.append(sprite)
             # print("addSprite()" + str(len(self.constructionList)))
 
@@ -166,37 +174,110 @@ class Game:
         x = self.box.x
         y = self.box.y
         checkIfOccupied = myDict.get((x, y))
-        if (checkIfOccupied):
+        if checkIfOccupied:
+            if myDict[(x, y)].type == SPRITETYPE.SEA:
+                return
             del myDict[(x, y)]
             try:
                 ## you might delete the left part
                 other = checkIfOccupied.otherSquare
                 del myDict[other]
-            except():
+            except:
                 pass
             checkIfOccupied.kill()
 
 
     # edited
-    def initializeTerrain(self, initDict):
+    def initializeTerrain(self):
         # initDict contains the initial terrain, and has the same structure of "myDict",
         # but the values are int instead of booleans
         # e.g: 1=water, 2=building, 3=tree, 4=land...
         # We will be needing a dictionary for every kind of terrain, or we may need to change the value type of myDict
         # into integers (and modify the )
-        for x in range(0, SCREENWIDTH, TILESIZE):
-            for y in range(0, SCREENHEIGHT, TILESIZE):
-                type = initDict.get(x, y)
-                if type == 1:
-                    tree = Tree(self, x, y)
-                    self.addSprite(self.treeDict, self.allTrees, tree)
-                    self.allSprites.add(tree)
-                    self.allTrees.add(tree)
+        initTerrin = []
+        print("initialize")
+        with open("Terrain.txt", "rt") as File:
+            line = File.readline()
+            while line:
+                initTerrin.append(line)
+                line = File.readline()
+            File.close()
+        # print(initTerrin)
+        for x in range(0, SCREENWIDTHBYTILES):
+            for y in range(0, SCREENHEIGHTBYTILES):
+                type = int(initTerrin[y][x])
+                # print(SPRITETYPE.SEA.value)
+                if type == SPRITETYPE.TREE.value:
+                    tree = Tree(self, x, y, -1)
+                    self.addSprite(self.spriteDict, self.allSprites, self.allTrees, tree)
                     # self.Treedict[(x, y)] = tree
+                elif type == SPRITETYPE.SEA.value:
+                    sea = Sea(self, x, y)
+                    self.addSprite(self.spriteDict, self.allSprites, self.allSea, sea)
+                    # self.Seadict[(x, y)] = sea
+                    # print("sea")
+                elif type == SPRITETYPE.FACTORY.value:
+                    factory = Factory(self, x - 1, y, x, y, -3)
+                    self.spriteDict[(self.box.x - 1, self.box.y)] = factory
+                    self.addSprite(self.spriteDict, self.allSprites, self.allFactories, factory)
+                    # self.facTorydict[(x, y)] = factory
+                elif type == SPRITETYPE.HOUSE.value:
+                    house = House(self, x, y, -2)
+                    self.addSprite(self.spriteDict, self.allSprites, self.allHouses, house)
+            try:
+                checkSpritesCompletion = lambda sprite: not sprite.nextTurn()
+                self.constructionList = list(filter(checkSpritesCompletion, self.constructionList))
+            except():
+                pass
+                # self.dict[(x, y)] = house
+
+    def seaRise(self):
+        for i in range(0, 2):
+            # delete without checking occupation
+            x = self.seaX
+            y = self.seaY
+            # temp = self.spriteDict[(x, y)]
+            # if not temp:
+            #     del self.spriteDict[(x, y)]
+            #     try:
+            #         checkIfOccupied = self.spriteDict.get((x, y))
+            #         ## you might delete the left part
+            #         other = checkIfOccupied.otherSquare
+            #         del self.spriteDict[other]
+            #     except:
+            #         pass
+            #     checkIfOccupied.kill()
+            checkIfOccupied = self.spriteDict.get((x, y))
+            if checkIfOccupied:
+                # if self.spriteDict[(x, y)].type == SPRITETYPE.SEA:
+                #     return
+                del self.spriteDict[(x, y)]
+                try:
+                    ## you might delete the left part
+                    other = checkIfOccupied.otherSquare
+                    del self.spriteDict[other]
+                except:
                     pass
-    # edited
+                checkIfOccupied.kill()
+
+            # add sea
+            sea = Sea(self, x, y)
+            self.addSprite(self.spriteDict, self.allSprites, self.allSea, sea)
+
+
+            # move x, y
+            if self.seaX == 29:
+                self.seaX = 0
+                self.seaY += 1
+            else:
+                self.seaX += 1
+            pass
+
+
+
+
 
 game = Game()
+game.initializeTerrain()
 game.run()
 pygame.quit()
-
