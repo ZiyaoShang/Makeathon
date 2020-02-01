@@ -18,12 +18,14 @@ class Game:
 
         self.population = 4000
         self.seaLevel = 0
+        self.seaIncrement = 1
         self.resource = 2700
         self.carryingCapacity = 4100
 
         self.currentTurn = 0
         # counter of Sprites
-        self.treeCount = 200
+        self.startTreeCount = 0
+        self.treeCount = 0
         self.houseCount = 5
         self.factoryCount = 1
 
@@ -99,6 +101,7 @@ class Game:
         # add one turn for each constructing sprite,
         # they will change color when the construction is finished
         for sprite in self.spriteDict:
+
             pass
         try:
             checkSpritesCompletion = lambda sprite: not sprite.nextTurn()
@@ -109,7 +112,7 @@ class Game:
 
         numHouses = self.houseCount
         numFactories = self.factoryCount
-        numTrees = self.treeCount
+
 
         self.currentTurn += 1
         self.resource = numFactories * 300 + STARTRESOURCES - self.population / 20
@@ -124,13 +127,16 @@ class Game:
         self.population += 0.5 * (self.carryingCapacity - self.population) / self.carryingCapacity * self.population
 
         # update seaLevel
-        self.seaLevel += 1 + numTrees * 0.05
-        self.currentTurn += 1
+        self.seaIncrement = (self.startTreeCount - self.treeCount) * 0.03
+        self.seaIncrement = self.seaIncrement if self.seaIncrement >= 0 else 0
+        self.seaLevel += self.seaIncrement
+        print(self.seaIncrement)
         print("seaLevel " + str(self.seaLevel) + "\n" + "population " + str(self.population) + "\n" + "capacity " + str(self.carryingCapacity)
               + "\n" + "resources " + str(self.resource) + "\n\n")
         # self.initializeTerrain()
 
-        for x in range(0, int(1 + numTrees * 0.05)):
+        for x in range(0, int(self.seaIncrement + 1)):
+            # print("drown")
             self.seaRise()
 
     def update(self):
@@ -177,6 +183,8 @@ class Game:
         if checkIfOccupied:
             if myDict[(x, y)].type == SPRITETYPE.SEA:
                 return
+            elif myDict[(x, y)].type == SPRITETYPE.TREE:
+                self.treeCount -= 1
             del myDict[(x, y)]
             try:
                 ## you might delete the left part
@@ -218,8 +226,8 @@ class Game:
                     # print("sea")
                 elif type == SPRITETYPE.FACTORY.value:
                     factory = Factory(self, x - 1, y, x, y, -3)
-                    self.spriteDict[(self.box.x - 1, self.box.y)] = factory
                     self.addSprite(self.spriteDict, self.allSprites, self.allFactories, factory)
+                    self.spriteDict[(x - 1, y)] = factory
                     # self.facTorydict[(x, y)] = factory
                 elif type == SPRITETYPE.HOUSE.value:
                     house = House(self, x, y, -2)
@@ -230,9 +238,17 @@ class Game:
             except():
                 pass
                 # self.dict[(x, y)] = house
+            # print(self.treeCount)
+        self.startTreeCount = self.treeCount
 
+            
     def seaRise(self):
-        for i in range(0, 2):
+        rise = 3
+        if self.seaIncrement < 1/3:
+            rise = 1
+        elif self.seaIncrement < 2/3:
+            rise = 2
+        for i in range(0, rise):
             # delete without checking occupation
             x = self.seaX
             y = self.seaY
@@ -254,8 +270,13 @@ class Game:
                 del self.spriteDict[(x, y)]
                 try:
                     ## you might delete the left part
-                    other = checkIfOccupied.otherSquare
-                    del self.spriteDict[other]
+                    if checkIfOccupied.type == SPRITETYPE.FACTORY:
+                        print("Sea: " + str((self.seaX, self.seaY)))
+                        print("deleteFactory")
+                        other = checkIfOccupied.otherSquare
+                        del self.spriteDict[other]
+                    elif checkIfOccupied.type == SPRITETYPE.TREE:
+                        self.treeCount -= 1
                 except:
                     pass
                 checkIfOccupied.kill()
@@ -266,12 +287,18 @@ class Game:
 
 
             # move x, y
-            if self.seaX == 29:
+            if self.seaX == SCREENWIDTHBYTILES - 1:
                 self.seaX = 0
                 self.seaY += 1
             else:
                 self.seaX += 1
-            pass
+
+            if self.seaX < SCREENWIDTHBYTILES and self.seaY < SCREENHEIGHTBYTILES:
+                self.box.moveTo(self.seaX + 1, self.seaY + 1)
+            elif self.seaX >= SCREENHEIGHTBYTILES:
+                self.box.moveTo(self.seaX, self.seaY + 1)
+            else:
+                self.box.moveTo(self.seaX + 1, self.seaY)
 
 
 
