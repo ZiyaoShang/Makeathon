@@ -8,6 +8,7 @@ from Sea import *
 from Factory import *
 from House import *
 from SPRITETYPE import *
+from Emotion import *
 
 class Game:
 
@@ -21,6 +22,7 @@ class Game:
         self.seaIncrement = 1
         self.resource = 2700
         self.carryingCapacity = 4100
+        self.emotion = Emotion.NORMAL
 
         self.currentTurn = 0
         # counter of Sprites
@@ -42,7 +44,7 @@ class Game:
         self.box = Box(self, self.screen)
 
         self.seaX = 0
-        self.seaY = 10
+        self.seaY = 0
 
     # Game loop
     def run(self):
@@ -71,12 +73,12 @@ class Game:
 
                 # USE KEYS TO DISPLAY TREES T -> Create Trees, D -> Delete Trees
                 if keys[K_t]:
-                    tree = Tree(self, self.box.x, self.box.y)
+                    tree = Tree(self, self.box.x, self.box.y, self.emotion.value)
                     self.addSprite(self.spriteDict, self.allSprites, self.allTrees, tree)
 
                 # factory two-tile resolution!!!
                 if keys[K_f]:
-                    factory = Factory(self, self.box.x, self.box.y, self.box.x - 1, self.box.y)
+                    factory = Factory(self, self.box.x, self.box.y, self.box.x - 1, self.box.y, self.emotion.value)
                     self.spriteDict[(self.box.x - 1, self.box.y)] = factory
                     print("sprite")
                     self.addSprite(self.spriteDict, self.allSprites, self.allFactories, factory)
@@ -86,7 +88,7 @@ class Game:
                     self.delSprite(self.spriteDict)
 
                 if keys[K_h]:
-                    house = House(self, self.box.x, self.box.y)
+                    house = House(self, self.box.x, self.box.y, self.emotion.value)
                     self.addSprite(self.spriteDict, self.allSprites, self.allHouses, house)
 
                 # testing sea over here:
@@ -124,6 +126,10 @@ class Game:
         else:
             self.carryingCapacity = self.resource
 
+            ## manually decrease carrying capacity
+        if 0 < self.carryingCapacity - self.population <= 10:
+            self.carryingCapacity *= 0.9
+
         # update population (r max = 0.5)
 
         self.population += 0.8 * (self.carryingCapacity - self.population) / self.carryingCapacity * self.population
@@ -132,15 +138,23 @@ class Game:
         self.seaIncrement = (self.startTreeCount - self.treeCount) * 0.03
         self.seaIncrement = self.seaIncrement if self.seaIncrement >= 0 else 0
         self.seaLevel += self.seaIncrement
-        print(self.seaIncrement)
-        print("seaLevel " + str(self.seaLevel) + "\n" + "population " + str(self.population) + "\n" + "capacity " + str(self.carryingCapacity)
-              + "\n" + "resources " + str(self.resource) + " " + str(numFactories) + "\n\n")
 
         # self.initializeTerrain()
 
         for x in range(0, int(self.seaIncrement + 1)):
             # print("drown")
             self.seaRise()
+
+        if self.population < 1100:
+            self.emotion = Emotion.LOW
+            self.resource *= 0.8
+        else:
+            self.emotion = Emotion.NORMAL
+
+
+        print("seaLevel " + str(self.seaLevel) + "\n" + "population " + str(self.population) + "\n" + "capacity " + str(
+            self.carryingCapacity)
+              + "\n" + "resources " + str(self.resource) + " " + str(numFactories) + "\n Emotion: " + str(self.emotion) + "\n\n")
 
     def update(self):
         self.allSprites.update()
@@ -227,6 +241,9 @@ class Game:
                 elif type == SPRITETYPE.SEA.value:
                     sea = Sea(self, x, y)
                     self.addSprite(self.spriteDict, self.allSprites, self.allSea, sea)
+                    self.seaX =\
+                        x
+                    self.seaY = y
                     # self.Seadict[(x, y)] = sea
                     # print("sea")
                 elif type == SPRITETYPE.FACTORY.value:
@@ -282,6 +299,9 @@ class Game:
                         # print("deleteFactory")
                         other = checkIfOccupied.otherSquare
                         del self.spriteDict[other]
+                        self.factoryCount -= 1
+                    elif checkIfOccupied.type == SPRITETYPE.HOUSE:
+                        self.houseCount -= 1
                     elif checkIfOccupied.type == SPRITETYPE.TREE:
                         self.treeCount -= 1
                 except:

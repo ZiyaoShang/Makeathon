@@ -1,6 +1,7 @@
 import pygame
 from setting import *
 from SPRITETYPE import *
+from Emotion import *
 
 class Factory(pygame.sprite.Sprite):
     TURN = 3
@@ -17,6 +18,7 @@ class Factory(pygame.sprite.Sprite):
         self.modifier = modifier
         self.turn = 0
         self.type = SPRITETYPE.FACTORY
+        self.emotion = Emotion.NORMAL
 
         if y1 != y2 and x1 != x2:
             return None
