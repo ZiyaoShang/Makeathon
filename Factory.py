@@ -13,7 +13,7 @@ class Factory(pygame.sprite.Sprite):
         self.color = PURPLE
         self.image = None
         self.rect = None
-        self.otherSquare = (x2, y2)
+        self.otherSquare = None
         self.modifier = modifier
         self.turn = 0
         self.type = SPRITETYPE.FACTORY
@@ -25,14 +25,17 @@ class Factory(pygame.sprite.Sprite):
             self.y = y1
             self.image = pygame.Surface((2 * TILESIZE, TILESIZE))
 
+            #save the larger of the two as default x
             if x1 - x2 != -1 and x1 - x2 != 1:
                 return None
             elif x1 - x2 == -1:
-                self.x = x1
+                self.x = x2
                 self.rect = self.image.get_rect(center=((x2 * TILESIZE, (y1 + 0.5) * TILESIZE)))
+                self.otherSquare = (x1, y1)
             elif x1 - x2 == 1:
-                self.x == x2
+                self.x = x1
                 self.rect = self.image.get_rect(center=((x1 * TILESIZE, (y1 + 0.5) * TILESIZE)))
+                self.otherSquare = (x2, y1)
 
         elif x1 == x2:
             self.x = x1

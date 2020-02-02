@@ -26,8 +26,8 @@ class Game:
         # counter of Sprites
         self.startTreeCount = 0
         self.treeCount = 0
-        self.houseCount = 5
-        self.factoryCount = 1
+        self.houseCount = 0
+        self.factoryCount = 0
 
         self.allSea = pygame.sprite.Group()
         self.allFactories = pygame.sprite.Group()
@@ -78,6 +78,7 @@ class Game:
                 if keys[K_f]:
                     factory = Factory(self, self.box.x, self.box.y, self.box.x - 1, self.box.y)
                     self.spriteDict[(self.box.x - 1, self.box.y)] = factory
+                    print("sprite")
                     self.addSprite(self.spriteDict, self.allSprites, self.allFactories, factory)
                     # self.allFactories.add(factory)
 
@@ -115,16 +116,17 @@ class Game:
 
 
         self.currentTurn += 1
-        self.resource = numFactories * 300 + STARTRESOURCES - self.population / 20
+        # self.resource = numFactories * 300 + STARTRESOURCES - self.population / 20
+        self.resource += numFactories * 200 - self.population / 5
         # update capacity
-        if self.resource > numHouses * 800:
-            self.carryingCapacity = numHouses * 800
+        if self.resource > numHouses * 400:
+            self.carryingCapacity = numHouses * 400
         else:
             self.carryingCapacity = self.resource
 
         # update population (r max = 0.5)
 
-        self.population += 0.5 * (self.carryingCapacity - self.population) / self.carryingCapacity * self.population
+        self.population += 0.8 * (self.carryingCapacity - self.population) / self.carryingCapacity * self.population
 
         # update seaLevel
         self.seaIncrement = (self.startTreeCount - self.treeCount) * 0.03
@@ -132,7 +134,8 @@ class Game:
         self.seaLevel += self.seaIncrement
         print(self.seaIncrement)
         print("seaLevel " + str(self.seaLevel) + "\n" + "population " + str(self.population) + "\n" + "capacity " + str(self.carryingCapacity)
-              + "\n" + "resources " + str(self.resource) + "\n\n")
+              + "\n" + "resources " + str(self.resource) + " " + str(numFactories) + "\n\n")
+
         # self.initializeTerrain()
 
         for x in range(0, int(self.seaIncrement + 1)):
@@ -166,6 +169,7 @@ class Game:
         x = sprite.x
         y = sprite.y
         checkIfOccupied = myDict.get((x, y))
+        # print(checkIfOccupied)
         if not checkIfOccupied:
             self.allSprites.add(sprite)
             myGroup.add(sprite)
@@ -186,6 +190,7 @@ class Game:
             elif myDict[(x, y)].type == SPRITETYPE.TREE:
                 self.treeCount -= 1
             del myDict[(x, y)]
+            # print("delete")
             try:
                 ## you might delete the left part
                 other = checkIfOccupied.otherSquare
@@ -203,7 +208,7 @@ class Game:
         # We will be needing a dictionary for every kind of terrain, or we may need to change the value type of myDict
         # into integers (and modify the )
         initTerrin = []
-        print("initialize")
+        # print("initialize")
         with open("Terrain.txt", "rt") as File:
             line = File.readline()
             while line:
@@ -228,10 +233,12 @@ class Game:
                     factory = Factory(self, x - 1, y, x, y, -3)
                     self.addSprite(self.spriteDict, self.allSprites, self.allFactories, factory)
                     self.spriteDict[(x - 1, y)] = factory
+                    # self.factoryCount += 1
                     # self.facTorydict[(x, y)] = factory
                 elif type == SPRITETYPE.HOUSE.value:
                     house = House(self, x, y, -2)
                     self.addSprite(self.spriteDict, self.allSprites, self.allHouses, house)
+                    # self.houseCount += 1
             try:
                 checkSpritesCompletion = lambda sprite: not sprite.nextTurn()
                 self.constructionList = list(filter(checkSpritesCompletion, self.constructionList))
@@ -271,8 +278,8 @@ class Game:
                 try:
                     ## you might delete the left part
                     if checkIfOccupied.type == SPRITETYPE.FACTORY:
-                        print("Sea: " + str((self.seaX, self.seaY)))
-                        print("deleteFactory")
+                        # print("Sea: " + str((self.seaX, self.seaY)))
+                        # print("deleteFactory")
                         other = checkIfOccupied.otherSquare
                         del self.spriteDict[other]
                     elif checkIfOccupied.type == SPRITETYPE.TREE:
