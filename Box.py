@@ -32,3 +32,10 @@ class Box(pygame.sprite.Sprite):
                 self.y -= dy
 
         self.__drawBox()
+
+    def moveTo(self, newX, newY):
+        if newX >= SCREENWIDTHBYTILES or newX < 0 or newY >= SCREENHEIGHTBYTILES or newY < 0:
+            return
+        self.x = newX
+        self.y = newY
+        self.__drawBox()
