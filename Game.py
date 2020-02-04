@@ -193,8 +193,8 @@ class Game:
             if factoryFlag:
                 checkIfLeftNeighborOccupied = myDict.get((x - 1, y))
                 checkIfRightNeighborOccupied = myDict.get((x + 1, y))
-                # checkIfTopNeighborOccupied = myDict.get((x, y - 1))
-                # checkIfBottomNeighborOccupied = myDict.get((x, y + 1))
+                checkIfTopNeighborOccupied = myDict.get((x, y - 1))
+                checkIfBottomNeighborOccupied = myDict.get((x, y + 1))
                 if not checkIfLeftNeighborOccupied:
                     print(10)
                     sprite = Factory(self, self.box.x, self.box.y, self.box.x - 1, self.box.y, self.emotion.value)
@@ -203,13 +203,13 @@ class Game:
                     x += 1
                     sprite = Factory(self, self.box.x, self.box.y, self.box.x + 1, self.box.y, self.emotion.value)
                     self.spriteDict[(self.box.x, self.box.y)] = sprite
-                # elif not checkIfTopNeighborOccupied:
-                #     sprite = Factory(self, self.box.x, self.box.y, self.box.x, self.box.y - 1, self.emotion.value)
-                #     self.spriteDict[(self.box.x, self.box.y - 1)] = sprite
-                # elif not checkIfBottomNeighborOccupied:
-                #     y = self.box.y + 1
-                #     sprite = Factory(self, self.box.x, self.box.y, self.box.x, self.box.y + 1, self.emotion.value)
-                #     self.spriteDict[(self.box.x, self.box.y)] = sprite
+                elif not checkIfTopNeighborOccupied:
+                    sprite = Factory(self, self.box.x, self.box.y, self.box.x, self.box.y - 1, self.emotion.value)
+                    self.spriteDict[(self.box.x, self.box.y - 1)] = sprite
+                elif not checkIfBottomNeighborOccupied:
+                    y += 1
+                    sprite = Factory(self, self.box.x, self.box.y, self.box.x, self.box.y + 1, self.emotion.value)
+                    self.spriteDict[(self.box.x, self.box.y)] = sprite
                 else:
                     return
             self.allSprites.add(sprite)
@@ -233,12 +233,18 @@ class Game:
             # print("delete")
             elif myDict[(x, y)].type == SPRITETYPE.FACTORY:
                 other = checkIfOccupied.otherSquare
-                if other[0] == x:
-                    # print(11)
-                    del myDict[(x + 1, y)]
-                elif other[0] != x:
-                    # print(10)
-                    del myDict[(x - 1, y)]
+                if not checkIfOccupied.pattern: # horizontal
+                    if other[0] == x:
+                        # print(11)
+                        del myDict[(x + 1, y)]
+                    else:
+                        # print(10)
+                        del myDict[(x - 1, y)]
+                else:
+                    if other[1] == y:
+                        del myDict[(x, y + 1)]
+                    else:
+                        del myDict[(x, y - 1)]
                 # del myDict[other]
             del myDict[(x, y)]
             checkIfOccupied.kill()

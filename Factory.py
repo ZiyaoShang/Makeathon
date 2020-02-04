@@ -19,6 +19,7 @@ class Factory(pygame.sprite.Sprite):
         self.turn = 0
         self.type = SPRITETYPE.FACTORY
         self.emotion = Emotion.NORMAL
+        self.pattern = 0 # 0 horizontal, 1 vertical
 
         if y1 != y2 and x1 != x2:
             return None
@@ -26,6 +27,7 @@ class Factory(pygame.sprite.Sprite):
         elif y1 == y2:
             self.y = y1
             self.image = pygame.Surface((2 * TILESIZE, TILESIZE))
+            self.pattern = 0
 
             #save the larger of the two as default x
             if x1 - x2 != -1 and x1 - x2 != 1:
@@ -42,14 +44,18 @@ class Factory(pygame.sprite.Sprite):
         elif x1 == x2:
             self.x = x1
             self.image = pygame.Surface((TILESIZE, 2 * TILESIZE))
-            if y1 - y2 != -1 and y1 - y2 == 1:
+            self.pattern = 1
+
+            if y1 - y2 != -1 and y1 - y2 != 1:
                 return None
             elif y1 - y2 == -1:
                 self.y = y2
                 self.rect = self.image.get_rect(center=((x1 + 0.5) * TILESIZE, y2 * TILESIZE))
+                self.otherSquare = (x1, y1)
             elif y1 - y2 == 1:
                 self.y = y1
                 self.rect = self.image.get_rect(center=((x1 + 0.5) * TILESIZE, y1 * TILESIZE))
+                self.otherSquare = (x1, y2)
 
         self.image.fill(WHITE)
 
