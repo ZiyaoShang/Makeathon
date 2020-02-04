@@ -45,10 +45,10 @@ class Factory(pygame.sprite.Sprite):
             if y1 - y2 != -1 and y1 - y2 == 1:
                 return None
             elif y1 - y2 == -1:
-                self.y = y1
+                self.y = y2
                 self.rect = self.image.get_rect(center=((x1 + 0.5) * TILESIZE, y2 * TILESIZE))
             elif y1 - y2 == 1:
-                self.y = y2
+                self.y = y1
                 self.rect = self.image.get_rect(center=((x1 + 0.5) * TILESIZE, y1 * TILESIZE))
 
         self.image.fill(WHITE)
