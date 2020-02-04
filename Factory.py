@@ -66,5 +66,7 @@ class Factory(pygame.sprite.Sprite):
         return False
 
     def completeBuilding(self):
-        self.image.fill(Factory.color)
+       # source : "https://icons8.com/icons/set/manufacturing" > Manufacturing
+        picture = pygame.image.load("icons8-manufacturing-96.png")
+        self.image = pygame.transform.scale(picture, (32, 32))
         self.game.factoryCount += 1
