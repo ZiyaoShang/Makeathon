@@ -33,5 +33,7 @@ class House(pygame.sprite.Sprite):
         return False
 
     def completeBuilding(self):
-        self.image.fill(House.color)
+        # source : "https://icons8.com/icons/set/cottage--v1"
+        picture = pygame.image.load("icons8-house-96.png")
+        self.image = pygame.transform.scale(picture, (32, 32))
         self.game.houseCount += 1

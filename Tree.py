@@ -30,5 +30,7 @@ class Tree(pygame.sprite.Sprite):
         return False
 
     def completeBuilding(self):
-        self.image.fill(Tree.color)
+        # source : "https://icons8.com/icons/set/tree--v1"
+        picture = pygame.image.load("icons8-tree-96.png")
+        self.image = pygame.transform.scale(picture, (32, 32))
         self.game.treeCount += 1

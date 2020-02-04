@@ -131,7 +131,6 @@ class Game:
             self.carryingCapacity *= 0.9
 
         # update population (r max = 0.5)
-
         self.population += 0.8 * (self.carryingCapacity - self.population) / self.carryingCapacity * self.population
 
         # update seaLevel
