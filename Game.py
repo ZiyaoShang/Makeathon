@@ -46,6 +46,7 @@ class Game:
         self.seaX = 0
         self.seaY = 0
 
+
     # Game loop
     def run(self):
         while self.running:
@@ -78,10 +79,8 @@ class Game:
 
                 # factory two-tile resolution!!!
                 if keys[K_f]:
-                    factory = Factory(self, self.box.x, self.box.y, self.box.x - 1, self.box.y, self.emotion.value)
-                    self.spriteDict[(self.box.x - 1, self.box.y)] = factory
-                    print("sprite")
-                    self.addSprite(self.spriteDict, self.allSprites, self.allFactories, factory)
+                    factory = None
+                    self.addSprite(self.spriteDict, self.allSprites, self.allFactories, factoryFlag=1)
                     # self.allFactories.add(factory)
 
                 if keys[K_d]:
@@ -179,12 +178,41 @@ class Game:
         for y in range(0, SCREENHEIGHT, TILESIZE):
             pygame.draw.line(self.screen, LIGHTGREY, (0, y), (SCREENWIDTH, y))
 
-    def addSprite(self, myDict, myGroup, specificGroup, sprite):
-        x = sprite.x
-        y = sprite.y
+    def addSprite(self, myDict, myGroup, specificGroup, sprite=None, factoryFlag=0):
+        x = 0
+        y = 0
+        if not factoryFlag:
+            x = sprite.x
+            y = sprite.y
+        else:
+            x = self.box.x
+            y = self.box.y
         checkIfOccupied = myDict.get((x, y))
+
         # print(checkIfOccupied)
         if not checkIfOccupied:
+            if factoryFlag:
+                checkIfLeftNeighborOccupied = myDict.get((x - 1, y))
+                checkIfRightNeighborOccupied = myDict.get((x + 1, y))
+                # checkIfTopNeighborOccupied = myDict.get((x, y - 1))
+                # checkIfBottomNeighborOccupied = myDict.get((x, y + 1))
+                if not checkIfLeftNeighborOccupied:
+                    print(10)
+                    sprite = Factory(self, self.box.x, self.box.y, self.box.x - 1, self.box.y, self.emotion.value)
+                    self.spriteDict[(self.box.x - 1, self.box.y)] = sprite
+                elif not checkIfRightNeighborOccupied:
+                    x += 1
+                    sprite = Factory(self, self.box.x, self.box.y, self.box.x + 1, self.box.y, self.emotion.value)
+                    self.spriteDict[(self.box.x, self.box.y)] = sprite
+                # elif not checkIfTopNeighborOccupied:
+                #     sprite = Factory(self, self.box.x, self.box.y, self.box.x, self.box.y - 1, self.emotion.value)
+                #     self.spriteDict[(self.box.x, self.box.y - 1)] = sprite
+                # elif not checkIfBottomNeighborOccupied:
+                #     y = self.box.y + 1
+                #     sprite = Factory(self, self.box.x, self.box.y, self.box.x, self.box.y + 1, self.emotion.value)
+                #     self.spriteDict[(self.box.x, self.box.y)] = sprite
+                else:
+                    return
             self.allSprites.add(sprite)
             myGroup.add(sprite)
             specificGroup.add(sprite)
@@ -203,14 +231,17 @@ class Game:
                 return
             elif myDict[(x, y)].type == SPRITETYPE.TREE:
                 self.treeCount -= 1
-            del myDict[(x, y)]
             # print("delete")
-            try:
-                ## you might delete the left part
+            elif myDict[(x, y)].type == SPRITETYPE.FACTORY:
                 other = checkIfOccupied.otherSquare
-                del myDict[other]
-            except:
-                pass
+                if other[0] == x:
+                    # print(11)
+                    del myDict[(x + 1, y)]
+                elif other[0] != x:
+                    # print(10)
+                    del myDict[(x - 1, y)]
+                # del myDict[other]
+            del myDict[(x, y)]
             checkIfOccupied.kill()
 
 

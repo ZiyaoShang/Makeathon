@@ -17,6 +17,7 @@ RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 BLUE = (0, 0, 255)
 PURPLE = (255, 0, 255)
+
 from pygame.locals import (
     K_UP,
     K_DOWN,
@@ -34,6 +35,7 @@ from pygame.locals import (
     K_f,
     K_h,
     K_s,
+    K_ESCAPE,
 )
 
 WATERLEVELCHANGE = 1
