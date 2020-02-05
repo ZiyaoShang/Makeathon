@@ -14,7 +14,7 @@ class Game:
 
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode([SCREENWIDTH, SCREENHEIGHT])
+        self.screen = pygame.display.set_mode([SCREENWIDTH, SCREENHEIGHT + TILESIZE])
         self.allSprites = pygame.sprite.Group()
 
         self.population = 4000
@@ -46,8 +46,7 @@ class Game:
         self.seaX = 0
         self.seaY = 0
 
-
-    # Game loop
+        # Game loop
     def run(self):
         while self.running:
             self.events()
@@ -119,6 +118,7 @@ class Game:
         self.currentTurn += 1
         # self.resource = numFactories * 300 + STARTRESOURCES - self.population / 20
         self.resource += numFactories * 200 - self.population / 5
+        print(numFactories)
         # update capacity
         if self.resource > numHouses * 400:
             self.carryingCapacity = numHouses * 400
@@ -160,11 +160,20 @@ class Game:
         self.allFactories.update()
         self.allHouses.update()
 
+
     def draw(self):
         self.screen.fill(DARKGREY)
         self.allSprites.draw(self.screen)
         self.draw_grid()
         self.box.move()
+        font = pygame.font.Font('freesansbold.ttf', 18)
+        toWrite = "sea level: " + str(int(self.seaLevel)) + "; population: " + str(int(self.population)) + "; capacity: " + str(
+            int(self.carryingCapacity)) + "; resources " + str(int(self.resource)) + " " + str(int(self.factoryCount)) + "; Emotion: " + \
+                  str(self.emotion)
+
+        text = font.render(toWrite, True, GREEN, DARKGREY)
+        self.screen.blit(text, (10, SCREENHEIGHT))
+
         pygame.display.flip()
 
 
