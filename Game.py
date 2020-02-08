@@ -35,6 +35,7 @@ class Game:
         self.allFactories = pygame.sprite.Group()
         self.allTrees = pygame.sprite.Group()
         self.allHouses = pygame.sprite.Group()
+        self.allWaves = pygame.sprite.Group()
 
         self.spriteDict = {}
         self.constructionList = []
@@ -46,12 +47,16 @@ class Game:
         self.seaX = 0
         self.seaY = 0
 
+        self.clock = pygame.time.Clock()
+
         # Game loop
     def run(self):
         while self.running:
+            Sea.updateSeaTick()
             self.events()
             self.update()
             self.draw()
+            self.clock.tick(80)
 
     def events(self):
         for event in pygame.event.get():
@@ -80,7 +85,6 @@ class Game:
                 if keys[K_f]:
                     factory = None
                     self.addSprite(self.spriteDict, self.allSprites, self.allFactories, factoryFlag=1)
-                    # self.allFactories.add(factory)
 
                 if keys[K_d]:
                     self.delSprite(self.spriteDict)
@@ -98,7 +102,6 @@ class Game:
                     self.newTurn()
 
     def newTurn(self):
-
         # add one turn for each constructing sprite,
         # they will change color when the construction is finished
         for sprite in self.spriteDict:
@@ -109,7 +112,7 @@ class Game:
             self.constructionList = list(filter(checkSpritesCompletion, self.constructionList))
         except():
             pass
-        print(len(self.constructionList))
+        # print(len(self.constructionList))
 
         numHouses = self.houseCount
         numFactories = self.factoryCount
@@ -118,7 +121,7 @@ class Game:
         self.currentTurn += 1
         # self.resource = numFactories * 300 + STARTRESOURCES - self.population / 20
         self.resource += numFactories * 200 - self.population / 5
-        print(numFactories)
+        # print(numFactories)
         # update capacity
         if self.resource > numHouses * 400:
             self.carryingCapacity = numHouses * 400
@@ -150,20 +153,23 @@ class Game:
             self.emotion = Emotion.NORMAL
 
 
-        print("seaLevel " + str(self.seaLevel) + "\n" + "population " + str(self.population) + "\n" + "capacity " + str(
-            self.carryingCapacity)
-              + "\n" + "resources " + str(self.resource) + " " + str(numFactories) + "\n Emotion: " + str(self.emotion) + "\n\n")
+        # print("seaLevel " + str(self.seaLevel) + "\n" + "population " + str(self.population) + "\n" + "capacity " + str(
+        #     self.carryingCapacity)
+        #       + "\n" + "resources " + str(self.resource) + " " + str(numFactories) + "\n Emotion: " + str(self.emotion) + "\n\n")
 
     def update(self):
+
         self.allSprites.update()
-        self.allTrees.update()
-        self.allFactories.update()
-        self.allHouses.update()
+        # self.allTrees.update()
+        # self.allFactories.update()
+        # self.allHouses.update()
+
 
 
     def draw(self):
         self.screen.fill(DARKGREY)
         self.allSprites.draw(self.screen)
+        # self.allWaves.draw(self.screen)
         self.draw_grid()
         self.box.move()
         font = pygame.font.Font('freesansbold.ttf', 18)
@@ -275,6 +281,7 @@ class Game:
                 line = File.readline()
             File.close()
         # print(initTerrin)
+
         for x in range(0, SCREENWIDTHBYTILES):
             for y in range(0, SCREENHEIGHTBYTILES):
                 type = int(initTerrin[y][x])
@@ -286,8 +293,7 @@ class Game:
                 elif type == SPRITETYPE.SEA.value:
                     sea = Sea(self, x, y)
                     self.addSprite(self.spriteDict, self.allSprites, self.allSea, sea)
-                    self.seaX =\
-                        x
+                    self.seaX = x
                     self.seaY = y
                     # self.Seadict[(x, y)] = sea
                     # print("sea")
@@ -309,6 +315,9 @@ class Game:
                 # self.dict[(x, y)] = house
             # print(self.treeCount)
         self.startTreeCount = self.treeCount
+        self.seaX = 0
+        self.seaY += 1
+        # self.allWaves.add(Wave(self))
 
             
     def seaRise(self):
@@ -356,6 +365,7 @@ class Game:
             # add sea
             sea = Sea(self, x, y)
             self.addSprite(self.spriteDict, self.allSprites, self.allSea, sea)
+
 
 
             # move x, y
